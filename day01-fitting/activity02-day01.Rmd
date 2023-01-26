@@ -29,4 +29,71 @@ m1 <- lm(pf_score ~ pf_expression_control, data = hfi_2016)
 tidy(m1)
 ```
 
+## Day 2
+### Overall model fit
+```{r dplry}
+hfi_2016 %>%
+  summarize(cor=cor(pf_score,pf_expression_control))
+```
+
+There is a strong positive correlation between `pf_score` and `pf_expression_control`.
+
+```{r rsquared}
+glance(m1)
+```
+
+The r-squared value for this model is `.71`, which means that this model is `71%` more accurate than using the mean `pf_score` of the dataset as our predictor.
+
+### Create a New Model
+```{r hf-model}
+m2 <- lm(hf_score ~ pf_expression_control, data = hfi_2016)
+tidy(m2)
+```
+Countries have a base mean hf_score of `5.053` and for every unit of `pf_expression_control`, `hf_score` will increase by `0.368`.
+
+### Prediction and prediction errors
+```{r plot task 3}
+hfi_2016 %>% 
+  ggplot(aes(x=pf_expression_control, y=pf_score)) +
+  geom_smooth(method = "lm", se = FALSE) +
+  geom_point() + 
+  theme_bw() + 
+  ggtitle('pf_score vs. pf_expression_control')
+```
+
+### Model Diagnostics
+```{r augment}
+m1_aug <- augment(m1)
+```
+
+```{r residual chart}
+ggplot(data = m1_aug, aes(x = .fitted, y = .resid)) +
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  xlab("Fitted values") +
+  ylab("Residuals") + 
+  theme_bw()
+```
+The residuals look like they have constant variance until the higher predicted values where variance seems to decrease.
+
+```{r histogram}
+ggplot(data = m1_aug, aes(x = .resid)) +
+  geom_histogram(binwidth = 0.25) +
+  xlab("Residuals") + 
+  theme_bw()
+```
+Constant variability appears to be violated because the historgram is not a normal curve, having a left skew.
+
+### Challange: More Practice
+
+```{r another variable}
+hfi_2016 %>%
+  ggplot(aes(x = pf_expression_influence, y = pf_score)) +
+  geom_point()
+  
+m3 <- lm(pf_score ~ pf_expression_influence, data = hfi_2016)
+tidy(m3)
+
+glance(m3)
+```
 
